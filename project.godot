@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="KOD"
+run/main_scene="uid://c17coc16tq2hw"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/net.yarvis.pixel_pen/plugin.cfg")
 
 [physics]
 
