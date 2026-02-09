@@ -73,10 +73,29 @@ func cell_to_world(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x * tile_size, cell.y * tile_size)
 
 func cell_center(cell: Vector2i) -> Vector2:
+	if _ground != null:
+		# TileMapLayer handles the exact tile origin (Godot 4 uses centered coords).
+		return _ground_local_to_parent_pos(_ground.map_to_local(cell))
 	return cell_to_world(cell) + Vector2(tile_size * 0.5, tile_size * 0.5)
 
 func world_to_cell(pos: Vector2) -> Vector2i:
+	if _ground != null:
+		return _ground.local_to_map(_parent_pos_to_ground_local(pos))
 	return Vector2i(int(floor(pos.x / tile_size)), int(floor(pos.y / tile_size)))
+
+func _ground_local_to_parent_pos(ground_local: Vector2) -> Vector2:
+	var gpos := _ground.to_global(ground_local)
+	var p := get_parent() as Node2D
+	if p != null:
+		return p.to_local(gpos)
+	return gpos
+
+func _parent_pos_to_ground_local(parent_pos: Vector2) -> Vector2:
+	var p := get_parent() as Node2D
+	var gpos := parent_pos
+	if p != null:
+		gpos = p.to_global(parent_pos)
+	return _ground.to_local(gpos)
 
 func _generate() -> void:
 	_tiles = PackedInt32Array()
@@ -169,7 +188,7 @@ func _apply_to_ground() -> void:
 	for y in range(map_height):
 		for x in range(map_width):
 			var cell := Vector2i(x, y)
-			var t := tile_at(cell)
+			var t := _tiles[y * map_width + x] if _tiles.size() == map_width * map_height else Tile.GRASS
 			var atlas: Vector2i = TilesetFactory.atlas_coords_for(t)
 			_ground.set_cell(cell, source_id, atlas, 0)
 
