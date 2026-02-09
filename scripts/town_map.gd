@@ -1,13 +1,18 @@
 extends Node2D
 class_name TownMap
 
+# Avoid relying on class_name registration order during headless loads.
+const TilesetFactory = preload("res://scripts/town_tileset_factory.gd")
+
 # Simple 16x16 top-down town map:
-# - Drawn procedurally (no external art needed yet).
+# - Generated procedurally, rendered via TileMapLayer + 16x16 atlas texture.
 # - Provides walkability queries for the player controller.
 
 @export var tile_size := 16
 @export var map_width := 40
 @export var map_height := 30
+@export var ground_layer_path: NodePath
+@export var atlas_png_path := "res://assets/tiles/town_atlas.png"
 
 enum Tile {
 	GRASS = 0,
@@ -17,10 +22,11 @@ enum Tile {
 }
 
 var _tiles: PackedInt32Array = PackedInt32Array()
+var _ground: TileMapLayer = null
 
 func _ready() -> void:
 	_generate()
-	queue_redraw()
+	_apply_to_ground()
 
 func in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < map_width and cell.y < map_height
@@ -121,42 +127,25 @@ func _set_tile(cell: Vector2i, t: int) -> void:
 		return
 	_tiles[cell.y * map_width + cell.x] = t
 
-func _draw() -> void:
-	# Colors kept intentionally simple; we can swap to real pixel art tiles later.
-	var c_grass := Color("#2f8f2f")
-	var c_grass_detail := Color("#256f25")
-	var c_road := Color("#3a3a3a")
-	var c_road_line := Color("#c9c47a")
-	var c_sidewalk := Color("#9a9a9a")
-	var c_building := Color("#7a3f2a")
-	var c_building_roof := Color("#9b4f35")
+func _apply_to_ground() -> void:
+	_ground = get_node_or_null(ground_layer_path) as TileMapLayer
+	if _ground == null:
+		push_warning("TownMap: ground_layer_path is not set; map won't render.")
+		return
+
+	var ts: TileSet = TilesetFactory.build(atlas_png_path)
+	if ts == null:
+		return
+
+	_ground.tile_set = ts
+	_ground.clear()
+
+	# Source id is the first (and only) source we added.
+	var source_id: int = ts.get_source_id(0)
 
 	for y in range(map_height):
 		for x in range(map_width):
 			var cell := Vector2i(x, y)
 			var t := tile_at(cell)
-			var pos := cell_to_world(cell)
-			var rect := Rect2(pos, Vector2(tile_size, tile_size))
-
-			match t:
-				Tile.GRASS:
-					draw_rect(rect, c_grass, true)
-					# Cheap "texture": a single dot pattern.
-					if (x + y) % 3 == 0:
-						draw_rect(Rect2(pos + Vector2(5, 5), Vector2(2, 2)), c_grass_detail, true)
-				Tile.ROAD:
-					draw_rect(rect, c_road, true)
-					# Lane markings on the center cross.
-					if (x == map_width / 2 or y == map_height / 2) and ((x + y) % 2 == 0):
-						draw_rect(Rect2(pos + Vector2(7, 2), Vector2(2, tile_size - 4)), c_road_line, true)
-				Tile.SIDEWALK:
-					draw_rect(rect, c_sidewalk, true)
-					draw_rect(Rect2(pos + Vector2(2, 2), Vector2(tile_size - 4, tile_size - 4)), Color("#b5b5b5"), false, 1.0)
-				Tile.BUILDING:
-					draw_rect(rect, c_building, true)
-					draw_rect(Rect2(pos + Vector2(1, 1), Vector2(tile_size - 2, 4)), c_building_roof, true)
-					draw_rect(Rect2(pos + Vector2(4, 7), Vector2(3, 3)), Color("#ffd27d"), true) # window
-					draw_rect(Rect2(pos + Vector2(9, 7), Vector2(3, 3)), Color("#ffd27d"), true) # window
-				_:
-					draw_rect(rect, Color.MAGENTA, true)
-
+			var atlas: Vector2i = TilesetFactory.atlas_coords_for(t)
+			_ground.set_cell(cell, source_id, atlas, 0)
