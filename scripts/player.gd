@@ -48,13 +48,13 @@ func _process(delta: float) -> void:
 
 func _input_dir_4() -> Vector2i:
 	# Priority order keeps movement deterministic if multiple keys are pressed.
-	if Input.is_action_just_pressed("ui_left"):
+	if Input.is_action_pressed("ui_left"):
 		return Vector2i.LEFT
-	if Input.is_action_just_pressed("ui_right"):
+	if Input.is_action_pressed("ui_right"):
 		return Vector2i.RIGHT
-	if Input.is_action_just_pressed("ui_up"):
+	if Input.is_action_pressed("ui_up"):
 		return Vector2i.UP
-	if Input.is_action_just_pressed("ui_down"):
+	if Input.is_action_pressed("ui_down"):
 		return Vector2i.DOWN
 	return Vector2i.ZERO
 
