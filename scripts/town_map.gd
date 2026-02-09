@@ -43,6 +43,14 @@ func _ready() -> void:
 		if ts != null:
 			_ground.tile_set = ts
 
+	# Manual painting: if the layer is empty, seed it once so you can see something
+	# immediately (and the player has walkable streets). After you paint and save,
+	# we won't overwrite anything.
+	if mode == Mode.MANUAL and _is_ground_empty():
+		_generate()
+		_apply_to_ground()
+		return
+
 	if mode == Mode.PROCEDURAL:
 		_generate()
 		_apply_to_ground()
@@ -178,3 +186,9 @@ func _tile_at_manual(cell: Vector2i) -> int:
 	if atlas.x < 0 or atlas.x > 3:
 		return Tile.GRASS
 	return atlas.x
+
+func _is_ground_empty() -> bool:
+	if _ground == null:
+		return true
+	var r := _ground.get_used_rect()
+	return r.size == Vector2i.ZERO

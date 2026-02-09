@@ -1,23 +1,13 @@
 [gd_scene format=3 uid="uid://c17coc16tq2hw"]
 
 [ext_resource type="Script" path="res://scripts/town_map.gd" id="1_4g7w0"]
-[ext_resource type="Texture2D" path="res://assets/tiles/town_atlas.png" id="1_h2yge"]
+[ext_resource type="TileSet" path="res://assets/tiles/town_tileset.tres" id="1_0yq3q"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2_40u8e"]
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1bvp3"]
-texture = ExtResource("1_h2yge")
-0:0/0 = 0
-1:0/0 = 0
-2:0/0 = 0
-3:0/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_lquwl"]
-sources/0 = SubResource("TileSetAtlasSource_1bvp3")
 
 [node name="Main" type="Node2D" unique_id=293455044]
 
 [node name="Ground" type="TileMapLayer" parent="." unique_id=184435125]
-tile_set = SubResource("TileSet_lquwl")
+tile_set = ExtResource("1_0yq3q")
 
 [node name="TownMap" type="Node2D" parent="." unique_id=1314989987]
 script = ExtResource("1_4g7w0")
