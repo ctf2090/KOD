@@ -19,7 +19,7 @@ enum Mode {
 @export var map_height := 30
 @export var ground_layer_path: NodePath
 @export var buildings_layer_path: NodePath
-@export var atlas_png_path := "res://assets/tiles/town_atlas.png"
+@export var atlas_png_path := "res://assets/tiles/ground_atlas.png"
 
 enum Tile {
 	GRASS = 0,

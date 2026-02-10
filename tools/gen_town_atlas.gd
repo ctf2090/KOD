@@ -4,7 +4,7 @@ extends SceneTree
 # without depending on external art yet.
 
 const OUT_DIR := "res://assets/tiles"
-const OUT_PNG := OUT_DIR + "/town_atlas.png"
+const OUT_PNG := OUT_DIR + "/ground_atlas.png"
 
 const TILE := 16
 const COLS := 4
@@ -86,4 +86,3 @@ func _draw_tile_building(img: Image, tx: int, ty: int) -> void:
 	_fill_rect(img, o + Vector2i(1, 1), Vector2i(TILE - 2, 4), roof)
 	_fill_rect(img, o + Vector2i(4, 7), Vector2i(3, 3), win)
 	_fill_rect(img, o + Vector2i(9, 7), Vector2i(3, 3), win)
-

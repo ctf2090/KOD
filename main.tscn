@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://c17coc16tq2hw"]
 
-[ext_resource type="TileSet" uid="uid://sw2hw3p25k0t" path="res://assets/tiles/town_tileset.tres" id="1_0yq3q"]
-[ext_resource type="Script" uid="uid://d0jrwdvuuwaar" path="res://scripts/town_map.gd" id="1_4g7w0"]
-[ext_resource type="Script" uid="uid://k266jtw1fdsv" path="res://scripts/player.gd" id="2_40u8e"]
+[ext_resource type="TileSet" path="res://assets/tiles/town_tileset.tres" id="1_0yq3q"]
+[ext_resource type="Script" path="res://scripts/town_map.gd" id="1_4g7w0"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_40u8e"]
 
 [node name="Main" type="Node2D" unique_id=293455044]
 
