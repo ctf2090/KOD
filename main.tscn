@@ -1,12 +1,12 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://yt0hiv85ujdy"]
 
-[ext_resource type="Script" path="res://scripts/town_map.gd" id="1_4g7w0"]
-[ext_resource type="TileSet" path="res://assets/tiles/ground_tileset.tres" id="1_gndts"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/player.png" id="2_2fkm3"]
-[ext_resource type="Script" path="res://scripts/player.gd" id="2_40u8e"]
-[ext_resource type="TileSet" path="res://assets/tiles/building_tileset.tres" id="2_bldts"]
-[ext_resource type="TileSet" path="res://assets/tiles/story_entrance_tileset.tres" id="3_entts"]
-[ext_resource type="Resource" path="res://data/story_buildings.tres" id="4_sdb"]
+[ext_resource type="Script" uid="uid://d0jrwdvuuwaar" path="res://scripts/town_map.gd" id="1_4g7w0"]
+[ext_resource type="TileSet" uid="uid://bj6e83jq0ihgk" path="res://assets/tiles/ground_tileset.tres" id="1_gndts"]
+[ext_resource type="Texture2D" uid="uid://bqg8qqyygawfu" path="res://assets/sprites/characters/player.png" id="2_2fkm3"]
+[ext_resource type="Script" uid="uid://k266jtw1fdsv" path="res://scripts/player.gd" id="2_40u8e"]
+[ext_resource type="TileSet" uid="uid://c5utekx3fsf8h" path="res://assets/tiles/building_tileset.tres" id="2_bldts"]
+[ext_resource type="TileSet" uid="uid://cx1kg23cqvi1e" path="res://assets/tiles/story_entrance_tileset.tres" id="3_entts"]
+[ext_resource type="Resource" uid="uid://byw5yxiumbto5" path="res://data/story_buildings.tres" id="4_sdb"]
 
 [node name="Main" type="Node2D" unique_id=293455044]
 
@@ -16,6 +16,7 @@ tile_set = ExtResource("1_gndts")
 
 [node name="Buildings" type="TileMapLayer" parent="." unique_id=758971788]
 z_index = 20
+tile_map_data = PackedByteArray("AAAQAAwAAQAAAAAAAAAQAA0AAQAAAAEAAAAQAA4AAQAAAAIAAAAQAA8AAQAAAAMAAAARAAwAAQABAAAAAAARAA4AAQABAAIAAAARAA8AAQABAAMAAAASAAwAAQACAAAAAAASAA0AAQACAAEAAAASAA4AAQACAAIAAAASAA8AAQACAAMAAAATAAwAAQADAAAAAAATAA0AAQADAAEAAAATAA4AAQADAAIAAAATAA8AAQADAAMAAAARAA0AAQABAAEAAAA=")
 tile_set = ExtResource("2_bldts")
 
 [node name="StoryBuildings" type="TileMapLayer" parent="." unique_id=2040672063]
@@ -41,6 +42,7 @@ z_index = 10
 script = ExtResource("2_40u8e")
 town_map_path = NodePath("../TownMap")
 start_cell = Vector2i(9, 18)
+metadata/_edit_lock_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=331286101]
 texture_filter = 1

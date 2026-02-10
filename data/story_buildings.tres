@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="StoryBuildingDB" format=3]
+[gd_resource type="Resource" script_class="StoryBuildingDB" format=3 uid="uid://byw5yxiumbto5"]
 
-[ext_resource type="Script" path="res://scripts/story_building_entry.gd" id="1_spifn"]
-[ext_resource type="Script" path="res://scripts/story_building_db.gd" id="2_vxvqt"]
+[ext_resource type="Script" uid="uid://dyor5femwmyhq" path="res://scripts/story_building_entry.gd" id="1_spifn"]
+[ext_resource type="Script" uid="uid://ddvo3hlxpxjts" path="res://scripts/story_building_db.gd" id="2_vxvqt"]
 
 [sub_resource type="Resource" id="Resource_uw2yg"]
 script = ExtResource("1_spifn")
