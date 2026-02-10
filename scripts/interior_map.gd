@@ -51,7 +51,8 @@ func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
 		return
 
 	gs.set_spawn_cell(gs.return_cell())
-	get_tree().change_scene_to_file(gs.return_scene_path())
+	# Defer scene changes to avoid "busy adding/removing children" errors.
+	get_tree().call_deferred("change_scene_to_file", gs.return_scene_path())
 
 func _seed_floor() -> void:
 	if _floor == null or _floor.tile_set == null:

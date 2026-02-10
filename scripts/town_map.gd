@@ -120,7 +120,8 @@ func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
 	if gs != null:
 		gs.set_return_target(entry.return_scene_path, entry.return_cell if entry.return_cell != Vector2i.ZERO else cell)
 		gs.set_spawn_cell(entry.interior_spawn_cell)
-	get_tree().change_scene_to_file(entry.interior_scene_path)
+	# Defer scene changes to avoid "busy adding/removing children" errors.
+	get_tree().call_deferred("change_scene_to_file", entry.interior_scene_path)
 
 func cell_to_world(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x * tile_size, cell.y * tile_size)
