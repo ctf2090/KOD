@@ -20,10 +20,12 @@ tile_set = ExtResource("2_bldts")
 
 [node name="StoryBuildings" type="TileMapLayer" parent="." unique_id=2040672063]
 z_index = 20
+tile_map_data = PackedByteArray("AAAVAA8AAAAAAAAAAAA=")
 tile_set = ExtResource("2_bldts")
 
 [node name="StoryEntrances" type="TileMapLayer" parent="." unique_id=96508167]
 z_index = 30
+tile_map_data = PackedByteArray("AAAVAA8AAAAAAAAAAAA=")
 tile_set = ExtResource("3_entts")
 
 [node name="TownMap" type="Node2D" parent="." unique_id=1314989987]
@@ -40,7 +42,7 @@ script = ExtResource("2_40u8e")
 town_map_path = NodePath("../TownMap")
 
 [node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=331286101]
-texture = ExtResource("2_2fkm3")
 texture_filter = 1
+texture = ExtResource("2_2fkm3")
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=8946681]
