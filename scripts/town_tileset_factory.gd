@@ -3,7 +3,7 @@ class_name TownTilesetFactory
 
 const TILE_SIZE := Vector2i(16, 16)
 
-enum GroundAtlasTile { GRASS = 0, ROAD = 1, SIDEWALK = 2 }
+enum GroundAtlasTile { GRASS = 0, ROAD = 1, WHITE_TILE = 2, RED_BRICK = 3 }
 
 # Four variants in the building atlas. These are just visual variants; any
 # building tile blocks movement via TownMap's Buildings layer check.
@@ -14,7 +14,7 @@ static func build(atlas_png_path: String) -> TileSet:
 	return build_ground(atlas_png_path)
 
 static func build_ground(atlas_png_path: String) -> TileSet:
-	return _build_atlas_tileset(atlas_png_path, 3)
+	return _build_atlas_tileset(atlas_png_path, 4)
 
 static func build_buildings(atlas_png_path: String) -> TileSet:
 	return _build_atlas_tileset(atlas_png_path, 4)
@@ -30,6 +30,14 @@ static func _build_atlas_tileset(atlas_png_path: String, cols: int) -> TileSet:
 	if tex == null:
 		push_error("TownTilesetFactory: failed to load atlas: %s" % atlas_png_path)
 		return null
+	# The import pipeline may be stale (e.g. we just regenerated the PNG). If the
+	# loaded texture is smaller than expected, force-load from the PNG pixels.
+	var min_w := cols * TILE_SIZE.x
+	var min_h := TILE_SIZE.y
+	if tex.get_width() < min_w or tex.get_height() < min_h:
+		var tex2 := _load_texture_from_image(atlas_png_path)
+		if tex2 != null:
+			tex = tex2
 
 	var ts := TileSet.new()
 	ts.tile_size = TILE_SIZE
@@ -45,6 +53,13 @@ static func _build_atlas_tileset(atlas_png_path: String, cols: int) -> TileSet:
 	ts.add_source(src)
 	return ts
 
+static func _load_texture_from_image(res_path: String) -> Texture2D:
+	var img := Image.new()
+	var err := img.load(res_path)
+	if err != OK:
+		return null
+	return ImageTexture.create_from_image(img)
+
 static func _load_texture_robust(res_path: String) -> Texture2D:
 	# In headless runs, the import pipeline might not be ready. Try ResourceLoader
 	# first, then fall back to loading via Image directly.
@@ -55,8 +70,4 @@ static func _load_texture_robust(res_path: String) -> Texture2D:
 		if t != null:
 			return t
 
-	var img := Image.new()
-	var err := img.load(res_path)
-	if err != OK:
-		return null
-	return ImageTexture.create_from_image(img)
+	return _load_texture_from_image(res_path)

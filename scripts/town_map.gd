@@ -230,8 +230,11 @@ func _tile_at_manual(cell: Vector2i) -> int:
 	var atlas := _ground.get_cell_atlas_coords(cell)
 	if atlas.y != 0:
 		return Tile.GRASS
-	if atlas.x < 0 or atlas.x > 2:
+	if atlas.x < 0 or atlas.x > 3:
 		return Tile.GRASS
+	# Ground atlas includes an extra decorative walkable tile (red bricks at x=3).
+	if atlas.x == 3:
+		return Tile.SIDEWALK
 	return atlas.x
 
 func _building_variant_for_cell(cell: Vector2i) -> int:

@@ -23,7 +23,7 @@ func _ensure_dir(res_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(abs)
 
 func _generate_ground_png() -> void:
-	var w := TILE * 3
+	var w := TILE * 4
 	var h := TILE * ROWS
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
@@ -32,8 +32,10 @@ func _generate_ground_png() -> void:
 	_draw_tile_grass(img, 0, 0)
 	# Tile 1: road
 	_draw_tile_road(img, 1, 0)
-	# Tile 2: sidewalk
-	_draw_tile_sidewalk(img, 2, 0)
+	# Tile 2: white tile icon
+	_draw_tile_white_tile(img, 2, 0)
+	# Tile 3: red bricks
+	_draw_tile_red_brick(img, 3, 0)
 
 	img.save_png(OUT_GROUND_PNG)
 
@@ -77,18 +79,53 @@ func _draw_tile_road(img: Image, tx: int, ty: int) -> void:
 		if (y % 4) < 2:
 			img.set_pixel(o.x + (TILE / 2), o.y + y, line)
 
-func _draw_tile_sidewalk(img: Image, tx: int, ty: int) -> void:
+func _draw_tile_white_tile(img: Image, tx: int, ty: int) -> void:
 	var o := _tile_origin(tx, ty)
-	var c0 := Color("#9a9a9a")
-	var c1 := Color("#b5b5b5")
-	_fill_rect(img, o, Vector2i(TILE, TILE), c0)
-	# inner border
-	for x in range(2, TILE - 2):
-		img.set_pixel(o.x + x, o.y + 2, c1)
-		img.set_pixel(o.x + x, o.y + (TILE - 3), c1)
-	for y in range(2, TILE - 2):
-		img.set_pixel(o.x + 2, o.y + y, c1)
-		img.set_pixel(o.x + (TILE - 3), o.y + y, c1)
+	var base := Color("#f2f2f2")
+	var edge := Color("#c7c7c7")
+	var shadow := Color("#d9d9d9")
+	_fill_rect(img, o, Vector2i(TILE, TILE), base)
+	# outer border
+	for x in range(0, TILE):
+		img.set_pixel(o.x + x, o.y + 0, edge)
+		img.set_pixel(o.x + x, o.y + (TILE - 1), edge)
+	for y in range(0, TILE):
+		img.set_pixel(o.x + 0, o.y + y, edge)
+		img.set_pixel(o.x + (TILE - 1), o.y + y, edge)
+	# simple "icon" bevel
+	for x in range(1, TILE - 1):
+		img.set_pixel(o.x + x, o.y + 1, shadow)
+	for y in range(1, TILE - 1):
+		img.set_pixel(o.x + 1, o.y + y, shadow)
+	# subtle grid lines
+	for x in range(4, TILE, 4):
+		for y in range(2, TILE - 2):
+			img.set_pixel(o.x + x, o.y + y, edge)
+	for y in range(4, TILE, 4):
+		for x in range(2, TILE - 2):
+			img.set_pixel(o.x + x, o.y + y, edge)
+
+func _draw_tile_red_brick(img: Image, tx: int, ty: int) -> void:
+	var o := _tile_origin(tx, ty)
+	var brick := Color("#b6423a")
+	var brick2 := Color("#a83b34")
+	var mortar := Color("#d9cbbf")
+	_fill_rect(img, o, Vector2i(TILE, TILE), brick)
+	# horizontal mortar lines
+	for y in range(0, TILE, 4):
+		for x in range(0, TILE):
+			img.set_pixel(o.x + x, o.y + y, mortar)
+	# vertical mortar lines (staggered)
+	for row in range(0, TILE, 4):
+		var off := 0 if ((row / 4) % 2) == 0 else 3
+		for x in range(off, TILE, 6):
+			for y in range(row + 1, min(row + 4, TILE)):
+				img.set_pixel(o.x + x, o.y + y, mortar)
+	# light variation
+	for y in range(1, TILE):
+		for x in range(1, TILE):
+			if img.get_pixel(o.x + x, o.y + y) == brick and ((x + y) % 7) == 0:
+				img.set_pixel(o.x + x, o.y + y, brick2)
 
 func _draw_tile_house(img: Image, tx: int, ty: int, roof: Color) -> void:
 	var o := _tile_origin(tx, ty)
