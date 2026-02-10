@@ -3,6 +3,7 @@ extends Node2D
 @export var town_map_path: NodePath
 @export var start_cell := Vector2i(20, 15)
 @export var move_seconds := 0.12
+@export var sprite_path: NodePath = NodePath("Sprite2D")
 
 const DIRS_4: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
@@ -18,6 +19,7 @@ var _moving := false
 var _move_t := 0.0
 var _from_pos := Vector2.ZERO
 var _to_pos := Vector2.ZERO
+var _sprite: Sprite2D = null
 
 func _ready() -> void:
 	_ensure_move_actions()
@@ -28,12 +30,16 @@ func _ready() -> void:
 		push_error("Player: town_map_path is not set or not a TownMap.")
 		return
 
+	_sprite = get_node_or_null(sprite_path) as Sprite2D
+	if _sprite != null:
+		_sprite.centered = true
+		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 	_cell = start_cell
 	if not _map.is_walkable(_cell):
 		_cell = _find_nearest_walkable(_cell)
 
 	position = _map.cell_center(_cell).round()
-	queue_redraw()
 
 func _process(delta: float) -> void:
 	if _map == null:
@@ -127,16 +133,3 @@ func _find_nearest_walkable(from_cell: Vector2i) -> Vector2i:
 
 	# Fallback to a safe-ish center.
 	return Vector2i(_map.map_width / 2, _map.map_height / 2)
-
-func _draw() -> void:
-	if _map == null:
-		return
-
-	var s := float(_map.tile_size)
-	var half := s * 0.5
-	# Body
-	draw_rect(Rect2(Vector2(-half, -half), Vector2(s, s)), Color("#2d6cff"), true)
-	# Outline
-	draw_rect(Rect2(Vector2(-half, -half), Vector2(s, s)), Color("#0a1a33"), false, 1.0)
-	# "Face" dot to show facing; we'll later add proper sprites/animations.
-	draw_rect(Rect2(Vector2(-2, -6), Vector2(4, 4)), Color("#dff1ff"), true)
