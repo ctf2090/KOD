@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="StoryBuildingDB" format=3]
+
+[ext_resource type="Script" path="res://scripts/story_building_entry.gd" id="1_spifn"]
+[ext_resource type="Script" path="res://scripts/story_building_db.gd" id="2_vxvqt"]
+
+[resource]
+script = ExtResource("2_vxvqt")
