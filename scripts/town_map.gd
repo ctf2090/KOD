@@ -18,6 +18,7 @@ enum Mode {
 @export var map_width := 40
 @export var map_height := 30
 @export var ground_layer_path: NodePath
+@export var buildings_layer_path: NodePath
 @export var atlas_png_path := "res://assets/tiles/town_atlas.png"
 
 enum Tile {
@@ -29,6 +30,7 @@ enum Tile {
 
 var _tiles: PackedInt32Array = PackedInt32Array()
 var _ground: TileMapLayer = null
+var _buildings: TileMapLayer = null
 
 func _ready() -> void:
 	_ground = get_node_or_null(ground_layer_path) as TileMapLayer
@@ -36,17 +38,21 @@ func _ready() -> void:
 		push_warning("TownMap: ground_layer_path is not set; map won't render.")
 		return
 
+	_buildings = get_node_or_null(buildings_layer_path) as TileMapLayer
+
 	# Ensure Ground has a TileSet so the editor can paint tiles even if this node
 	# runs in-game. In manual mode we must NOT clear/overwrite painted tiles.
 	if _ground.tile_set == null:
 		var ts: TileSet = TilesetFactory.build(atlas_png_path)
 		if ts != null:
 			_ground.tile_set = ts
+			if _buildings != null and _buildings.tile_set == null:
+				_buildings.tile_set = ts
 
 	# Manual painting: if the layer is empty, seed it once so you can see something
 	# immediately (and the player has walkable streets). After you paint and save,
 	# we won't overwrite anything.
-	if mode == Mode.MANUAL and _is_ground_empty():
+	if mode == Mode.MANUAL and _are_layers_empty():
 		_generate()
 		_apply_to_ground()
 		return
@@ -66,6 +72,8 @@ func tile_at(cell: Vector2i) -> int:
 	return _tiles[cell.y * map_width + cell.x]
 
 func is_walkable(cell: Vector2i) -> bool:
+	if _buildings != null and _buildings.get_cell_source_id(cell) != -1:
+		return false
 	var t := tile_at(cell)
 	return t == Tile.ROAD or t == Tile.SIDEWALK
 
@@ -179,18 +187,26 @@ func _apply_to_ground() -> void:
 	if _ground == null:
 		return
 	_ground.clear()
+	if _buildings != null:
+		_buildings.clear()
 
 	# Source id is the first (and only) source we added.
 	if _ground.tile_set == null:
 		return
-	var source_id: int = _ground.tile_set.get_source_id(0)
+	var ground_source_id: int = _ground.tile_set.get_source_id(0)
+	var buildings_source_id: int = ground_source_id
+	if _buildings != null and _buildings.tile_set != null:
+		buildings_source_id = _buildings.tile_set.get_source_id(0)
 
 	for y in range(map_height):
 		for x in range(map_width):
 			var cell := Vector2i(x, y)
 			var t := _tiles[y * map_width + x] if _tiles.size() == map_width * map_height else Tile.GRASS
 			var atlas: Vector2i = TilesetFactory.atlas_coords_for(t)
-			_ground.set_cell(cell, source_id, atlas, 0)
+			if _buildings != null and t == Tile.BUILDING:
+				_buildings.set_cell(cell, buildings_source_id, atlas, 0)
+			else:
+				_ground.set_cell(cell, ground_source_id, atlas, 0)
 
 func _tile_at_manual(cell: Vector2i) -> int:
 	# Reads the painted TileMapLayer. If empty, treat as GRASS.
@@ -206,8 +222,11 @@ func _tile_at_manual(cell: Vector2i) -> int:
 		return Tile.GRASS
 	return atlas.x
 
-func _is_ground_empty() -> bool:
+func _are_layers_empty() -> bool:
 	if _ground == null:
 		return true
-	var r := _ground.get_used_rect()
-	return r.size == Vector2i.ZERO
+	var gr := _ground.get_used_rect()
+	var br := Rect2i()
+	if _buildings != null:
+		br = _buildings.get_used_rect()
+	return gr.size == Vector2i.ZERO and br.size == Vector2i.ZERO
