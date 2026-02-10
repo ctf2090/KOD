@@ -22,6 +22,10 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	var buildings_source_id := -1
+	if buildings.tile_set != null:
+		buildings_source_id = buildings.tile_set.get_source_id(0)
+
 	var moved := 0
 	var used := ground.get_used_cells()
 	for cell: Vector2i in used:
@@ -34,8 +38,10 @@ func _initialize() -> void:
 
 		# Remove from ground, add to buildings.
 		ground.erase_cell(cell)
-		# We keep the same source id; later we will swap Buildings to a new tileset.
-		buildings.set_cell(cell, sid, Vector2i(0, 0), 0)
+		# If Buildings already has its own TileSet, use its source id; otherwise
+		# fall back to the Ground source id.
+		var out_sid := buildings_source_id if buildings_source_id != -1 else sid
+		buildings.set_cell(cell, out_sid, Vector2i(0, 0), 0)
 		moved += 1
 
 	var packed := PackedScene.new()
@@ -53,4 +59,3 @@ func _initialize() -> void:
 
 	print("Moved building cells: ", moved)
 	quit(0)
-

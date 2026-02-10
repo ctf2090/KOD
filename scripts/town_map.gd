@@ -19,7 +19,8 @@ enum Mode {
 @export var map_height := 30
 @export var ground_layer_path: NodePath
 @export var buildings_layer_path: NodePath
-@export var atlas_png_path := "res://assets/tiles/ground_atlas.png"
+@export var atlas_png_path := "res://assets/tiles/ground_atlas.png" # ground atlas
+@export var building_atlas_png_path := "res://assets/tiles/building_atlas.png"
 
 enum Tile {
 	GRASS = 0,
@@ -43,11 +44,14 @@ func _ready() -> void:
 	# Ensure Ground has a TileSet so the editor can paint tiles even if this node
 	# runs in-game. In manual mode we must NOT clear/overwrite painted tiles.
 	if _ground.tile_set == null:
-		var ts: TileSet = TilesetFactory.build(atlas_png_path)
-		if ts != null:
-			_ground.tile_set = ts
-			if _buildings != null and _buildings.tile_set == null:
-				_buildings.tile_set = ts
+		var ts_ground: TileSet = TilesetFactory.build_ground(atlas_png_path)
+		if ts_ground != null:
+			_ground.tile_set = ts_ground
+
+	if _buildings != null and _buildings.tile_set == null:
+		var ts_buildings: TileSet = TilesetFactory.build_buildings(building_atlas_png_path)
+		if ts_buildings != null:
+			_buildings.tile_set = ts_buildings
 
 	# Manual painting: if the layer is empty, seed it once so you can see something
 	# immediately (and the player has walkable streets). After you paint and save,
@@ -68,6 +72,9 @@ func tile_at(cell: Vector2i) -> int:
 	if not in_bounds(cell):
 		return Tile.BUILDING
 	if mode == Mode.MANUAL:
+		# Buildings live on their own layer in manual mode too.
+		if _buildings != null and _buildings.get_cell_source_id(cell) != -1:
+			return Tile.BUILDING
 		return _tile_at_manual(cell)
 	return _tiles[cell.y * map_width + cell.x]
 
@@ -194,7 +201,7 @@ func _apply_to_ground() -> void:
 	if _ground.tile_set == null:
 		return
 	var ground_source_id: int = _ground.tile_set.get_source_id(0)
-	var buildings_source_id: int = ground_source_id
+	var buildings_source_id: int = -1
 	if _buildings != null and _buildings.tile_set != null:
 		buildings_source_id = _buildings.tile_set.get_source_id(0)
 
@@ -202,11 +209,16 @@ func _apply_to_ground() -> void:
 		for x in range(map_width):
 			var cell := Vector2i(x, y)
 			var t := _tiles[y * map_width + x] if _tiles.size() == map_width * map_height else Tile.GRASS
-			var atlas: Vector2i = TilesetFactory.atlas_coords_for(t)
-			if _buildings != null and t == Tile.BUILDING:
-				_buildings.set_cell(cell, buildings_source_id, atlas, 0)
+			if _buildings != null and t == Tile.BUILDING and buildings_source_id != -1:
+				var variant := _building_variant_for_cell(cell)
+				var atlas_b: Vector2i = TilesetFactory.building_atlas_coords_for(variant)
+				_buildings.set_cell(cell, buildings_source_id, atlas_b, 0)
 			else:
-				_ground.set_cell(cell, ground_source_id, atlas, 0)
+				var ground_t := t
+				if ground_t == Tile.BUILDING:
+					ground_t = Tile.GRASS
+				var atlas_g: Vector2i = TilesetFactory.ground_atlas_coords_for(ground_t)
+				_ground.set_cell(cell, ground_source_id, atlas_g, 0)
 
 func _tile_at_manual(cell: Vector2i) -> int:
 	# Reads the painted TileMapLayer. If empty, treat as GRASS.
@@ -218,9 +230,13 @@ func _tile_at_manual(cell: Vector2i) -> int:
 	var atlas := _ground.get_cell_atlas_coords(cell)
 	if atlas.y != 0:
 		return Tile.GRASS
-	if atlas.x < 0 or atlas.x > 3:
+	if atlas.x < 0 or atlas.x > 2:
 		return Tile.GRASS
 	return atlas.x
+
+func _building_variant_for_cell(cell: Vector2i) -> int:
+	# Deterministic variant selection; keeps the same look between runs.
+	return int(posmod(cell.x * 13 + cell.y * 7, 4))
 
 func _are_layers_empty() -> bool:
 	if _ground == null:

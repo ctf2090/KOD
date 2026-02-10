@@ -4,24 +4,26 @@ extends SceneTree
 # without depending on external art yet.
 
 const OUT_DIR := "res://assets/tiles"
-const OUT_PNG := OUT_DIR + "/ground_atlas.png"
+const OUT_GROUND_PNG := OUT_DIR + "/ground_atlas.png"
+const OUT_BUILDING_PNG := OUT_DIR + "/building_atlas.png"
 
 const TILE := 16
-const COLS := 4
 const ROWS := 1
 
 func _initialize() -> void:
 	_ensure_dir(OUT_DIR)
-	_generate_png()
-	print("Wrote: ", OUT_PNG)
+	_generate_ground_png()
+	_generate_building_png()
+	print("Wrote: ", OUT_GROUND_PNG)
+	print("Wrote: ", OUT_BUILDING_PNG)
 	quit(0)
 
 func _ensure_dir(res_path: String) -> void:
 	var abs := ProjectSettings.globalize_path(res_path)
 	DirAccess.make_dir_recursive_absolute(abs)
 
-func _generate_png() -> void:
-	var w := TILE * COLS
+func _generate_ground_png() -> void:
+	var w := TILE * 3
 	var h := TILE * ROWS
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
@@ -32,10 +34,21 @@ func _generate_png() -> void:
 	_draw_tile_road(img, 1, 0)
 	# Tile 2: sidewalk
 	_draw_tile_sidewalk(img, 2, 0)
-	# Tile 3: building
-	_draw_tile_building(img, 3, 0)
 
-	img.save_png(OUT_PNG)
+	img.save_png(OUT_GROUND_PNG)
+
+func _generate_building_png() -> void:
+	var w := TILE * 4
+	var h := TILE * ROWS
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+
+	_draw_tile_house(img, 0, 0, Color("#9b4f35"))
+	_draw_tile_house(img, 1, 0, Color("#355a9b"))
+	_draw_tile_shop(img, 2, 0)
+	_draw_tile_tower(img, 3, 0)
+
+	img.save_png(OUT_BUILDING_PNG)
 
 func _tile_origin(tx: int, ty: int) -> Vector2i:
 	return Vector2i(tx * TILE, ty * TILE)
@@ -77,12 +90,44 @@ func _draw_tile_sidewalk(img: Image, tx: int, ty: int) -> void:
 		img.set_pixel(o.x + 2, o.y + y, c1)
 		img.set_pixel(o.x + (TILE - 3), o.y + y, c1)
 
-func _draw_tile_building(img: Image, tx: int, ty: int) -> void:
+func _draw_tile_house(img: Image, tx: int, ty: int, roof: Color) -> void:
 	var o := _tile_origin(tx, ty)
 	var wall := Color("#7a3f2a")
-	var roof := Color("#9b4f35")
 	var win := Color("#ffd27d")
+	var door := Color("#4a271b")
 	_fill_rect(img, o, Vector2i(TILE, TILE), wall)
 	_fill_rect(img, o + Vector2i(1, 1), Vector2i(TILE - 2, 4), roof)
 	_fill_rect(img, o + Vector2i(4, 7), Vector2i(3, 3), win)
 	_fill_rect(img, o + Vector2i(9, 7), Vector2i(3, 3), win)
+	_fill_rect(img, o + Vector2i(7, 11), Vector2i(2, 4), door)
+
+func _draw_tile_shop(img: Image, tx: int, ty: int) -> void:
+	var o := _tile_origin(tx, ty)
+	var wall := Color("#6b3a29")
+	var awn0 := Color("#d34a4a")
+	var awn1 := Color("#f1e7d3")
+	var glass := Color("#8fd3ff")
+	_fill_rect(img, o, Vector2i(TILE, TILE), wall)
+	# awning stripes
+	for x in range(1, TILE - 1):
+		var c := awn0 if (x % 4) < 2 else awn1
+		for y in range(1, 5):
+			img.set_pixel(o.x + x, o.y + y, c)
+	# big window
+	_fill_rect(img, o + Vector2i(2, 7), Vector2i(TILE - 4, 6), glass)
+	# base
+	_fill_rect(img, o + Vector2i(1, 14), Vector2i(TILE - 2, 1), Color("#2d2d2d"))
+
+func _draw_tile_tower(img: Image, tx: int, ty: int) -> void:
+	var o := _tile_origin(tx, ty)
+	var stone0 := Color("#6a6a6a")
+	var stone1 := Color("#808080")
+	var win := Color("#ffd27d")
+	_fill_rect(img, o, Vector2i(TILE, TILE), stone0)
+	# subtle bricks
+	for y in range(2, TILE - 2, 3):
+		for x in range(1 + (y / 3) % 2, TILE - 1, 4):
+			img.set_pixel(o.x + x, o.y + y, stone1)
+	# narrow windows
+	_fill_rect(img, o + Vector2i(7, 5), Vector2i(2, 3), win)
+	_fill_rect(img, o + Vector2i(7, 10), Vector2i(2, 3), win)
