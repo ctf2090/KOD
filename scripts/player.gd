@@ -5,6 +5,12 @@ extends Node2D
 @export var move_seconds := 0.12
 @export var sprite_path: NodePath = NodePath("Sprite2D")
 
+# Visual size target relative to our tile grid (1 tile = TownMap.tile_size pixels, default 16).
+# Note: Non-integer scaling like 1.5x can look uneven for pixel art unless the source sprite
+# is authored at the target pixel size (e.g. 24x32 for 1.5x2 tiles at 16px tiles).
+@export var desired_size_tiles := Vector2(1.5, 2.0)
+@export var anchor_feet_to_cell := false
+
 const DIRS_4: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
 const MOVE_LEFT: StringName = &"move_left"
@@ -38,8 +44,8 @@ func _ready() -> void:
 
 	_sprite = get_node_or_null(sprite_path) as Sprite2D
 	if _sprite != null:
-		_sprite.centered = true
 		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		_apply_sprite_size()
 
 	var gs := get_node_or_null("/root/GameState")
 	if gs != null and gs.has_method("has_spawn_cell") and gs.has_spawn_cell():
@@ -158,3 +164,29 @@ func _notify_cell_entered() -> void:
 	_last_notified_cell = _cell
 	if _map != null and _map.has_method("on_player_entered_cell"):
 		_map.call("on_player_entered_cell", self, _cell, _last_move_from_cell)
+
+func _apply_sprite_size() -> void:
+	if _sprite == null or _sprite.texture == null:
+		return
+
+	var tile_px := 16.0
+	if _map != null:
+		var ts = _map.get("tile_size")
+		if typeof(ts) in [TYPE_INT, TYPE_FLOAT] and float(ts) > 0.0:
+			tile_px = float(ts)
+
+	var desired_px := Vector2(desired_size_tiles.x * tile_px, desired_size_tiles.y * tile_px)
+	var tex_size: Vector2 = _sprite.texture.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return
+
+	_sprite.scale = Vector2(desired_px.x / tex_size.x, desired_px.y / tex_size.y)
+
+	if anchor_feet_to_cell:
+		# Anchor the sprite's bottom-center to the Player node origin (cell center).
+		_sprite.centered = false
+		_sprite.position = Vector2(-desired_px.x * 0.5, -desired_px.y)
+	else:
+		# Keep historical behavior (centered on the Player node).
+		_sprite.centered = true
+		_sprite.position = Vector2.ZERO
