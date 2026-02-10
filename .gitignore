@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
+.tmp/
+
+# PixelPen: Godot may leave locked temp copies in bin/ during import/load on Windows.
+addons/net.yarvis.pixel_pen/bin/~*.TMP
 /android/

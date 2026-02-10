@@ -4,7 +4,7 @@
 [ext_resource type="TileSet" path="res://assets/tiles/ground_tileset.tres" id="2_gndts"]
 [ext_resource type="TileSet" path="res://assets/tiles/story_exit_tileset.tres" id="3_exitts"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="4_player"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/player2.png" id="5_ptex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/player.png" id="5_ptex"]
 
 [node name="Interior" type="Node2D"]
 

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/town_map.gd" id="1_4g7w0"]
 [ext_resource type="TileSet" path="res://assets/tiles/ground_tileset.tres" id="1_gndts"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/player2.png" id="2_2fkm3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/player.png" id="2_2fkm3"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2_40u8e"]
 [ext_resource type="TileSet" path="res://assets/tiles/building_tileset.tres" id="2_bldts"]
 [ext_resource type="TileSet" path="res://assets/tiles/story_entrance_tileset.tres" id="3_entts"]
