@@ -17,6 +17,8 @@ func _ready() -> void:
 	# Seed a visible floor if none was painted yet.
 	if _floor != null and _floor.get_used_rect().size == Vector2i.ZERO:
 		_seed_floor()
+	if _exit != null and _exit.get_used_rect().size == Vector2i.ZERO:
+		_seed_exit()
 
 func in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < map_width and cell.y < map_height
@@ -60,6 +62,12 @@ func _seed_floor() -> void:
 	for y in range(map_height):
 		for x in range(map_width):
 			_floor.set_cell(Vector2i(x, y), sid, atlas, 0)
+
+func _seed_exit() -> void:
+	if _exit == null or _exit.tile_set == null:
+		return
+	var sid := _exit.tile_set.get_source_id(0)
+	_exit.set_cell(Vector2i(1, map_height - 2), sid, Vector2i(0, 0), 0)
 
 func _floor_local_to_parent_pos(floor_local: Vector2) -> Vector2:
 	var gpos := _floor.to_global(floor_local)
