@@ -12,6 +12,9 @@ func set_spawn_cell(cell: Vector2i) -> void:
 	_has_spawn_cell = true
 	_spawn_cell = cell
 
+func has_spawn_cell() -> bool:
+	return _has_spawn_cell
+
 func consume_spawn_cell(default_cell: Vector2i) -> Vector2i:
 	if not _has_spawn_cell:
 		return default_cell

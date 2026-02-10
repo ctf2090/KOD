@@ -36,7 +36,7 @@ func world_to_cell(pos: Vector2) -> Vector2i:
 		return _floor.local_to_map(_parent_pos_to_floor_local(pos))
 	return Vector2i(int(floor(pos.x / tile_size)), int(floor(pos.y / tile_size)))
 
-func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
+func on_player_entered_cell(_player: Node, cell: Vector2i, _from_cell: Vector2i = Vector2i.ZERO) -> void:
 	if _exit == null:
 		return
 	if _exit.get_cell_source_id(cell) == -1:
@@ -53,6 +53,18 @@ func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
 	gs.set_spawn_cell(gs.return_cell())
 	# Defer scene changes to avoid "busy adding/removing children" errors.
 	get_tree().call_deferred("change_scene_to_file", gs.return_scene_path())
+
+func default_spawn_cell() -> Vector2i:
+	# Spawn one tile above the story_exit marker tile.
+	if _exit != null:
+		var cells := _exit.get_used_cells()
+		if cells.size() > 0:
+			var exit_cell: Vector2i = cells[0]
+			var spawn := exit_cell + Vector2i(0, -1)
+			if in_bounds(spawn):
+				return spawn
+			return exit_cell
+	return Vector2i(map_width / 2, map_height / 2)
 
 func _seed_floor() -> void:
 	if _floor == null or _floor.tile_set == null:

@@ -102,7 +102,7 @@ func is_walkable(cell: Vector2i) -> bool:
 func is_story_entrance(cell: Vector2i) -> bool:
 	return _story_entrances != null and _story_entrances.get_cell_source_id(cell) != -1
 
-func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
+func on_player_entered_cell(_player: Node, cell: Vector2i, from_cell: Vector2i = Vector2i.ZERO) -> void:
 	if not is_story_entrance(cell):
 		return
 	if story_building_db == null:
@@ -118,8 +118,8 @@ func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
 
 	var gs := get_node_or_null("/root/GameState")
 	if gs != null:
-		gs.set_return_target(entry.return_scene_path, entry.return_cell if entry.return_cell != Vector2i.ZERO else cell)
-		gs.set_spawn_cell(entry.interior_spawn_cell)
+		var return_to := from_cell if from_cell != Vector2i.ZERO else cell
+		gs.set_return_target(entry.return_scene_path, return_to)
 	# Defer scene changes to avoid "busy adding/removing children" errors.
 	get_tree().call_deferred("change_scene_to_file", entry.interior_scene_path)
 

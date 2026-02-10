@@ -22,6 +22,7 @@ var _to_pos := Vector2.ZERO
 var _sprite: Sprite2D = null
 var _has_notified_cell := false
 var _last_notified_cell := Vector2i.ZERO
+var _last_move_from_cell := Vector2i.ZERO
 
 func _ready() -> void:
 	_ensure_move_actions()
@@ -41,7 +42,12 @@ func _ready() -> void:
 		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 	var gs := get_node_or_null("/root/GameState")
-	_cell = (gs.consume_spawn_cell(start_cell) as Vector2i) if gs != null and gs.has_method("consume_spawn_cell") else start_cell
+	if gs != null and gs.has_method("has_spawn_cell") and gs.has_spawn_cell():
+		_cell = gs.consume_spawn_cell(start_cell) as Vector2i
+	elif _map.has_method("default_spawn_cell"):
+		_cell = _map.call("default_spawn_cell") as Vector2i
+	else:
+		_cell = start_cell
 	if not _map.call("is_walkable", _cell):
 		_cell = _find_nearest_walkable(_cell)
 
@@ -115,6 +121,7 @@ func _try_step(dir: Vector2i) -> void:
 	if not _map.call("is_walkable", next):
 		return
 
+	_last_move_from_cell = _cell
 	_cell = next
 	_moving = true
 	_move_t = 0.0
@@ -150,4 +157,4 @@ func _notify_cell_entered() -> void:
 	_has_notified_cell = true
 	_last_notified_cell = _cell
 	if _map != null and _map.has_method("on_player_entered_cell"):
-		_map.call("on_player_entered_cell", self, _cell)
+		_map.call("on_player_entered_cell", self, _cell, _last_move_from_cell)
