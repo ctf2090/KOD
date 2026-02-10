@@ -3,5 +3,12 @@
 [ext_resource type="Script" path="res://scripts/story_building_entry.gd" id="1_spifn"]
 [ext_resource type="Script" path="res://scripts/story_building_db.gd" id="2_vxvqt"]
 
+[sub_resource type="Resource" id="Resource_uw2yg"]
+script = ExtResource("1_spifn")
+world_cell = Vector2i(21, 15)
+interior_scene_path = "res://scenes/interiors/interior_template.tscn"
+return_cell = Vector2i(21, 15)
+
 [resource]
 script = ExtResource("2_vxvqt")
+entries = Array[ExtResource("1_spifn")]([SubResource("Resource_uw2yg")])
