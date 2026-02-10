@@ -20,6 +20,8 @@ var _move_t := 0.0
 var _from_pos := Vector2.ZERO
 var _to_pos := Vector2.ZERO
 var _sprite: Sprite2D = null
+var _has_notified_cell := false
+var _last_notified_cell := Vector2i.ZERO
 
 func _ready() -> void:
 	_ensure_move_actions()
@@ -143,5 +145,9 @@ func _find_nearest_walkable(from_cell: Vector2i) -> Vector2i:
 	return Vector2i(0, 0)
 
 func _notify_cell_entered() -> void:
+	if _has_notified_cell and _last_notified_cell == _cell:
+		return
+	_has_notified_cell = true
+	_last_notified_cell = _cell
 	if _map != null and _map.has_method("on_player_entered_cell"):
 		_map.call("on_player_entered_cell", self, _cell)
