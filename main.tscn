@@ -40,6 +40,7 @@ story_building_db = ExtResource("4_sdb")
 z_index = 10
 script = ExtResource("2_40u8e")
 town_map_path = NodePath("../TownMap")
+start_cell = Vector2i(9, 18)
 
 [node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=331286101]
 texture_filter = 1
