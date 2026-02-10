@@ -6,6 +6,11 @@ extends Node2D
 
 const DIRS_4: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 
+const MOVE_LEFT: StringName = &"move_left"
+const MOVE_RIGHT: StringName = &"move_right"
+const MOVE_UP: StringName = &"move_up"
+const MOVE_DOWN: StringName = &"move_down"
+
 var _map: TownMap = null
 var _cell: Vector2i
 
@@ -15,6 +20,8 @@ var _from_pos := Vector2.ZERO
 var _to_pos := Vector2.ZERO
 
 func _ready() -> void:
+	_ensure_move_actions()
+
 	var node: Node = get_node_or_null(town_map_path)
 	_map = node as TownMap
 	if _map == null:
@@ -48,15 +55,44 @@ func _process(delta: float) -> void:
 
 func _input_dir_4() -> Vector2i:
 	# Priority order keeps movement deterministic if multiple keys are pressed.
-	if Input.is_action_pressed("ui_left"):
+	if Input.is_action_pressed(MOVE_LEFT):
 		return Vector2i.LEFT
-	if Input.is_action_pressed("ui_right"):
+	if Input.is_action_pressed(MOVE_RIGHT):
 		return Vector2i.RIGHT
-	if Input.is_action_pressed("ui_up"):
+	if Input.is_action_pressed(MOVE_UP):
 		return Vector2i.UP
-	if Input.is_action_pressed("ui_down"):
+	if Input.is_action_pressed(MOVE_DOWN):
 		return Vector2i.DOWN
 	return Vector2i.ZERO
+
+func _ensure_move_actions() -> void:
+	# Don't alter the built-in ui_* actions; instead provide gameplay actions
+	# so WASD won't unexpectedly change editor/menu navigation.
+	_ensure_action_has_keys(MOVE_LEFT, [KEY_A, KEY_LEFT])
+	_ensure_action_has_keys(MOVE_RIGHT, [KEY_D, KEY_RIGHT])
+	_ensure_action_has_keys(MOVE_UP, [KEY_W, KEY_UP])
+	_ensure_action_has_keys(MOVE_DOWN, [KEY_S, KEY_DOWN])
+
+func _ensure_action_has_keys(action: StringName, keys: Array[int]) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+
+	for k: int in keys:
+		if _action_has_key(action, k):
+			continue
+		var ev := InputEventKey.new()
+		ev.physical_keycode = k
+		ev.keycode = k
+		InputMap.action_add_event(action, ev)
+
+func _action_has_key(action: StringName, key: int) -> bool:
+	for ev in InputMap.action_get_events(action):
+		var kev := ev as InputEventKey
+		if kev == null:
+			continue
+		if kev.physical_keycode == key or kev.keycode == key:
+			return true
+	return false
 
 func _try_step(dir: Vector2i) -> void:
 	var next := _cell + dir
