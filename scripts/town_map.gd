@@ -19,8 +19,11 @@ enum Mode {
 @export var map_height := 30
 @export var ground_layer_path: NodePath
 @export var buildings_layer_path: NodePath
+@export var story_buildings_layer_path: NodePath
+@export var story_entrances_layer_path: NodePath
 @export var atlas_png_path := "res://assets/tiles/ground_atlas.png" # ground atlas
 @export var building_atlas_png_path := "res://assets/tiles/building_atlas.png"
+@export var story_building_db: StoryBuildingDB
 
 enum Tile {
 	GRASS = 0,
@@ -32,6 +35,8 @@ enum Tile {
 var _tiles: PackedInt32Array = PackedInt32Array()
 var _ground: TileMapLayer = null
 var _buildings: TileMapLayer = null
+var _story_buildings: TileMapLayer = null
+var _story_entrances: TileMapLayer = null
 
 func _ready() -> void:
 	_ground = get_node_or_null(ground_layer_path) as TileMapLayer
@@ -40,6 +45,8 @@ func _ready() -> void:
 		return
 
 	_buildings = get_node_or_null(buildings_layer_path) as TileMapLayer
+	_story_buildings = get_node_or_null(story_buildings_layer_path) as TileMapLayer
+	_story_entrances = get_node_or_null(story_entrances_layer_path) as TileMapLayer
 
 	# Ensure Ground has a TileSet so the editor can paint tiles even if this node
 	# runs in-game. In manual mode we must NOT clear/overwrite painted tiles.
@@ -83,6 +90,29 @@ func is_walkable(cell: Vector2i) -> bool:
 		return false
 	var t := tile_at(cell)
 	return t == Tile.ROAD or t == Tile.SIDEWALK
+
+func is_story_entrance(cell: Vector2i) -> bool:
+	return _story_entrances != null and _story_entrances.get_cell_source_id(cell) != -1
+
+func on_player_entered_cell(_player: Node, cell: Vector2i) -> void:
+	if not is_story_entrance(cell):
+		return
+	if story_building_db == null:
+		push_warning("TownMap: story entrance at %s but story_building_db is not set." % str(cell))
+		return
+	var entry := story_building_db.find_entry(cell)
+	if entry == null:
+		push_warning("TownMap: story entrance at %s has no DB entry." % str(cell))
+		return
+	if entry.interior_scene_path == "":
+		push_warning("TownMap: DB entry for %s has empty interior_scene_path." % str(cell))
+		return
+
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null:
+		gs.set_return_target(entry.return_scene_path, entry.return_cell if entry.return_cell != Vector2i.ZERO else cell)
+		gs.set_spawn_cell(entry.interior_spawn_cell)
+	get_tree().change_scene_to_file(entry.interior_scene_path)
 
 func cell_to_world(cell: Vector2i) -> Vector2:
 	return Vector2(cell.x * tile_size, cell.y * tile_size)
