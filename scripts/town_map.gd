@@ -86,8 +86,16 @@ func tile_at(cell: Vector2i) -> int:
 	return _tiles[cell.y * map_width + cell.x]
 
 func is_walkable(cell: Vector2i) -> bool:
+	if not in_bounds(cell):
+		return false
 	if _buildings != null and _buildings.get_cell_source_id(cell) != -1:
 		return false
+	# Story buildings/entrances are explicitly walkable so the player can step
+	# onto the building tile and immediately enter.
+	if _story_entrances != null and _story_entrances.get_cell_source_id(cell) != -1:
+		return true
+	if _story_buildings != null and _story_buildings.get_cell_source_id(cell) != -1:
+		return true
 	var t := tile_at(cell)
 	return t == Tile.ROAD or t == Tile.SIDEWALK
 
