@@ -44,7 +44,9 @@ func _ready() -> void:
 		_cell = _find_nearest_walkable(_cell)
 
 	position = (_map.call("cell_center", _cell) as Vector2).round()
-	_notify_cell_entered()
+	# Don't trigger story entrances on spawn; only when the player steps onto a
+	# tile. This avoids starting the game inside an interior and prevents
+	# immediate re-entry loops when returning to the world.
 
 func _process(delta: float) -> void:
 	if _map == null:
